@@ -65,7 +65,20 @@ function loadProfile(): FinancialProfile {
 }
 
 export default function DashboardPage() {
-  const [profile] = useState<FinancialProfile>(loadProfile);
+  const [profile, setProfile] = useState<FinancialProfile>(loadProfile);
+
+  // Sync from cloud on mount — overrides localStorage if Supabase is configured
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.profile) {
+          setProfile(data.profile);
+          localStorage.setItem("francesca_profile", JSON.stringify(data.profile));
+        }
+      })
+      .catch(() => {});
+  }, []);
   const [projection, setProjection] = useState<ProjectionYear[]>([]);
   const [retirement, setRetirement] = useState<RetirementSummary | null>(null);
   const [monteCarlo, setMonteCarlo] = useState<MonteCarloResult | null>(null);
@@ -173,20 +186,22 @@ export default function DashboardPage() {
           </div>
 
           {/* Account balance chips — inside hero, separated */}
-          <div style={{ borderTop: "0.5px solid var(--separator)", display: "grid", gridTemplateColumns: "repeat(5, 1fr)" }}>
-            {accounts.map((a, i) => (
-              <div
-                key={a.label}
-                style={{
-                  padding: "14px 0 16px",
-                  paddingLeft: i > 0 ? 14 : 0,
-                  borderLeft: i > 0 ? "0.5px solid var(--separator)" : "none",
-                }}
-              >
-                <p className="t-caption2" style={{ color: "var(--label-3)", marginBottom: 4 }}>{a.label}</p>
-                <p className="t-subhead" style={{ color: "var(--label)", fontVariantNumeric: "tabular-nums", fontWeight: 500 }}>{fmt$(a.value)}</p>
-              </div>
-            ))}
+          <div style={{ borderTop: "0.5px solid var(--separator)", overflowX: "auto", marginLeft: -24, marginRight: -24 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(90px, 1fr))", minWidth: 450, paddingLeft: 24, paddingRight: 24 }}>
+              {accounts.map((a, i) => (
+                <div
+                  key={a.label}
+                  style={{
+                    padding: "14px 0 16px",
+                    paddingLeft: i > 0 ? 14 : 0,
+                    borderLeft: i > 0 ? "0.5px solid var(--separator)" : "none",
+                  }}
+                >
+                  <p className="t-caption2" style={{ color: "var(--label-3)", marginBottom: 4 }}>{a.label}</p>
+                  <p className="t-subhead" style={{ color: "var(--label)", fontVariantNumeric: "tabular-nums", fontWeight: 500 }}>{fmt$(a.value)}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 

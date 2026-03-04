@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type { ReactNode } from "react";
 import Nav from "@/components/nav";
 import { DEFAULT_PROFILE, FinancialProfile } from "@/lib/types";
 
 interface FieldProps {
   label: string;
   note?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function Field({ label, note, children }: FieldProps) {
@@ -86,7 +87,7 @@ function GroupHeader({ title }: { title: string }) {
   return <p className="t-caption1" style={{ color: "var(--label-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 0, padding: "20px 0 8px" }}>{title}</p>;
 }
 
-function loadProfile(): FinancialProfile {
+function loadProfileLocal(): FinancialProfile {
   if (typeof window === "undefined") return DEFAULT_PROFILE;
   try {
     const s = localStorage.getItem("francesca_profile");
@@ -97,19 +98,45 @@ function loadProfile(): FinancialProfile {
 }
 
 export default function SettingsPage() {
-  const [p, setP] = useState<FinancialProfile>(loadProfile);
+  const [p, setP] = useState<FinancialProfile>(loadProfileLocal);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Load from cloud on mount (falls back to localStorage if Supabase not configured)
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.profile) {
+          setP(data.profile);
+          localStorage.setItem("francesca_profile", JSON.stringify(data.profile));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   function update(key: keyof FinancialProfile, val: number) {
     setP((prev) => ({ ...prev, [key]: val }));
     setSaved(false);
   }
 
-  function save() {
-    // In production: persist to Supabase
+  async function save() {
+    setSaving(true);
+    // Save to localStorage immediately
     if (typeof window !== "undefined") {
       localStorage.setItem("francesca_profile", JSON.stringify(p));
     }
+    // Save to cloud (graceful if Supabase not configured)
+    try {
+      await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(p),
+      });
+    } catch {
+      // Supabase not configured — localStorage save is sufficient
+    }
+    setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
@@ -126,23 +153,36 @@ export default function SettingsPage() {
           </div>
           <button
             onClick={save}
+            disabled={saving}
             style={{
               padding: "9px 20px", borderRadius: 10,
               background: saved ? "var(--green)" : "var(--blue)",
               color: "#fff", border: "none",
               fontSize: 14, fontWeight: 600,
-              fontFamily: "var(--font)", cursor: "pointer",
+              fontFamily: "var(--font)", cursor: saving ? "default" : "pointer",
               transition: "background 0.3s",
+              opacity: saving ? 0.7 : 1,
             }}
           >
-            {saved ? "Saved ✓" : "Save"}
+            {saved ? "Saved ✓" : saving ? "Saving…" : "Save"}
           </button>
         </div>
 
         <div className="fade-up delay-1">
 
-          {/* Income */}
+          {/* Personal */}
           <div className="glass" style={{ padding: "4px 20px 4px" }}>
+            <GroupHeader title="Personal" />
+            <Field label="Current Age" note="Used to calculate projection timeline">
+              <NumInput value={p.age} onChange={(v) => update("age", v)} prefix="" step={1} min={16} />
+            </Field>
+            <Field label="Target Retirement Age" note="When projections end and withdrawal begins">
+              <NumInput value={p.retirementAge} onChange={(v) => update("retirementAge", v)} prefix="" step={0.5} min={p.age + 1} />
+            </Field>
+          </div>
+
+          {/* Income */}
+          <div className="glass" style={{ padding: "4px 20px 4px", marginTop: 12 }}>
             <GroupHeader title="Income" />
             <Field label="Base Salary" note="Annual, pre-tax"><NumInput value={p.baseSalary} onChange={(v) => update("baseSalary", v)} step={1000} /></Field>
             <Field label="Bonus" note="Annual, not used for contributions by default"><NumInput value={p.bonus} onChange={(v) => update("bonus", v)} step={1000} /></Field>
@@ -188,7 +228,7 @@ export default function SettingsPage() {
           {/* Retirement */}
           <div className="glass" style={{ padding: "4px 20px 4px", marginTop: 12 }}>
             <GroupHeader title="Retirement Assumptions" />
-            <Field label="Assumed Marginal Rate at 59.5" note="Applied to pre-tax 401(k) withdrawals"><PctInput value={p.retirementMarginalRate} onChange={(v) => update("retirementMarginalRate", v)} /></Field>
+            <Field label="Assumed Marginal Rate at Retirement" note="Applied to pre-tax 401(k) withdrawals"><PctInput value={p.retirementMarginalRate} onChange={(v) => update("retirementMarginalRate", v)} /></Field>
             <Field label="Emergency Fund Target"><NumInput value={p.emergencyFundTarget} onChange={(v) => update("emergencyFundTarget", v)} step={1000} /></Field>
           </div>
 
