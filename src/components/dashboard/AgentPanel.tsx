@@ -1,7 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { FinancialProfile } from "@/lib/types";
+
+function renderMd(text: string): ReactNode[] {
+  return text.split("\n").map((line, li) => {
+    const isBullet = /^[-*]\s/.test(line);
+    const content = isBullet ? line.replace(/^[-*]\s/, "") : line;
+    const parts: ReactNode[] = [];
+    let rest = content;
+    let key = 0;
+    while (rest) {
+      const m = rest.match(/\*\*(.+?)\*\*/);
+      if (!m || m.index === undefined) { parts.push(rest); break; }
+      if (m.index > 0) parts.push(rest.slice(0, m.index));
+      parts.push(<strong key={key++} style={{ fontWeight: 600, color: "inherit" }}>{m[1]}</strong>);
+      rest = rest.slice(m.index + m[0].length);
+    }
+    if (isBullet) return <div key={li} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}><span style={{ color: "var(--label-3)", flexShrink: 0, marginTop: 1 }}>·</span><span>{parts}</span></div>;
+    if (!content.trim()) return <div key={li} style={{ height: 6 }} />;
+    return <div key={li}>{parts}</div>;
+  });
+}
 
 const SUGGESTED = [
   "What should I contribute each month?",
@@ -86,10 +107,10 @@ export default function AgentPanel({ profile }: Props) {
                   color: m.role === "user" ? "#fff" : "var(--label)",
                   maxWidth: "88%",
                   lineHeight: 1.5,
-                  whiteSpace: "pre-wrap",
+                  lineHeight: 1.6,
                 }}
               >
-                {m.text}
+                {m.role === "assistant" ? renderMd(m.text) : m.text}
               </div>
             </div>
           ))}
