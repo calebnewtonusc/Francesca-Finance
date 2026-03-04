@@ -1,10 +1,11 @@
+import type { ReactNode } from "react";
 import { fmt$ } from "@/lib/format";
 
 interface Props {
   label: string;
   balance: number;
   type: "tax-free" | "tax-deferred" | "taxable" | "cash";
-  icon: React.ReactNode;
+  icon: ReactNode;
 }
 
 const TYPE_LABELS: Record<Props["type"], string> = {

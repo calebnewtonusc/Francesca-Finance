@@ -103,7 +103,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <p className="t-footnote fade-in" style={{ color: "var(--red)", paddingLeft: 4 }}>
+            <p role="alert" className="t-footnote fade-in" style={{ color: "var(--red)", paddingLeft: 4 }}>
               {error}
             </p>
           )}

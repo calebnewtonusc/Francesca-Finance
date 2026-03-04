@@ -16,6 +16,9 @@ export function runMonteCarlo(profile: FinancialProfile, scenario: Scenario = "b
   const { equity, vol } = SCENARIO_RETURNS[scenario];
   const years = Math.ceil(profile.retirementAge - profile.age);
   const meanLog = Math.log(1 + equity) - 0.5 * vol ** 2;
+  // RSU uses a higher volatility (2× market vol) and its own return assumption
+  const rsuVol = vol * 2;
+  const rsuMeanLog = Math.log(1 + profile.returnRSU) - 0.5 * rsuVol ** 2;
   const yearTotals: number[][] = Array.from({ length: years }, () => []);
 
   for (let r = 0; r < runs; r++) {
@@ -31,6 +34,7 @@ export function runMonteCarlo(profile: FinancialProfile, scenario: Scenario = "b
       const salary = calcSalaryForYear(profile, y);
       const alloc = calcMonthlyAllocation({ ...profile, baseSalary: salary, balanceHYSA: bHYSA });
       const ret = Math.exp(meanLog + vol * randn()) - 1;
+      const retRSU = Math.exp(rsuMeanLog + rsuVol * randn()) - 1;
       infl *= 1 + profile.inflation;
 
       b401k = b401k * (1 + ret) + (alloc.pretax401k + alloc.employerMatch) * 12;
@@ -38,7 +42,7 @@ export function runMonteCarlo(profile: FinancialProfile, scenario: Scenario = "b
       bRoth = bRoth * (1 + ret) + alloc.rothIRA * 12;
       bBrok = bBrok * (1 + ret - profile.brokerageTaxDrag) + alloc.brokerage * 12;
       bHYSA = bHYSA * (1 + profile.returnHYSA) + alloc.hysa * 12;
-      bRSU = bRSU * (1 + equity * 1.5);
+      bRSU = bRSU * (1 + retRSU);
 
       yearTotals[y].push((b401k + bMega + bRoth + bBrok + bHYSA + bRSU) / infl);
     }
@@ -52,6 +56,4 @@ export function runMonteCarlo(profile: FinancialProfile, scenario: Scenario = "b
 
   const fin = yearTotals[yearTotals.length - 1];
   return { p10: pct(fin, 0.1), p25: pct(fin, 0.25), p50: pct(fin, 0.5), p75: pct(fin, 0.75), p90: pct(fin, 0.9), runs, yearData };
-}
- };
 }

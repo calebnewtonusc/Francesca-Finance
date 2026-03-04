@@ -20,19 +20,23 @@ export async function POST(req: NextRequest) {
   const results: { institution: string; accounts: { name: string; type: string; balance: number | null }[] }[] = [];
   const errors: string[] = [];
   for (const item of items) {
-    const token = decryptToken(item.access_token_encrypted as string);
-    const res = await plaid.accountsBalanceGet({ access_token: token });
+    try {
+      const token = decryptToken(item.access_token_encrypted as string);
+      const res = await plaid.accountsBalanceGet({ access_token: token });
 
-    for (const acct of res.data.accounts) {
-      await db.from("balance_snapshots").insert({
-        account_id: acct.account_id,
-        timestamp: new Date().toISOString(),
-        balance: acct.balances.current,
-        currency: acct.balances.iso_currency_code ?? "USD",
-      });
+      for (const acct of res.data.accounts) {
+        await db.from("balance_snapshots").insert({
+          account_id: acct.account_id,
+          timestamp: new Date().toISOString(),
+          balance: acct.balances.current,
+          currency: acct.balances.iso_currency_code ?? "USD",
+        });
+      }
+
+      results.push({ institution: item.institution, accounts: res.data.accounts.map((a) => ({ name: a.name, type: a.type, balance: a.balances.current })) });
+    } catch (err) {
+      errors.push(`${item.institution}: ${err instanceof Error ? err.message : "unknown error"}`);
     }
-
-    results.push({ institution: item.institution, accounts: res.data.accounts.map((a) => ({ name: a.name, type: a.type, balance: a.balances.current })) });
   }
 
   return NextResponse.json({ balances: results, errors });
