@@ -9,18 +9,17 @@ interface Row {
   label: string;
   monthly: number;
   annual: number;
-  color: string;
   note?: string;
 }
 
 export default function ContributionPlan({ allocation: a }: Props) {
   const rows: Row[] = [
-    { label: "401(k) Employee", monthly: a.pretax401k, annual: a.pretax401k * 12, color: "var(--blue)", note: "Pre-tax" },
-    { label: "Employer Match", monthly: a.employerMatch, annual: a.employerMatch * 12, color: "var(--green)", note: "Free money" },
-    { label: "Mega Backdoor Roth", monthly: a.megaBackdoor, annual: a.megaBackdoor * 12, color: "var(--purple)", note: "After-tax → Roth" },
-    { label: "Roth IRA", monthly: a.rothIRA, annual: a.rothIRA * 12, color: "var(--green)", note: "Tax-free growth" },
-    { label: "Brokerage", monthly: a.brokerage, annual: a.brokerage * 12, color: "var(--orange)", note: "Taxable" },
-    { label: "HYSA", monthly: a.hysa, annual: a.hysa * 12, color: "var(--label-2)", note: "Emergency fund" },
+    { label: "401(k) Employee", monthly: a.pretax401k, annual: a.pretax401k * 12, note: "Pre-tax" },
+    { label: "Employer Match", monthly: a.employerMatch, annual: a.employerMatch * 12, note: "Free money" },
+    { label: "Mega Backdoor Roth", monthly: a.megaBackdoor, annual: a.megaBackdoor * 12, note: "After-tax → Roth" },
+    { label: "Roth IRA", monthly: a.rothIRA, annual: a.rothIRA * 12, note: "Tax-free growth" },
+    { label: "Brokerage", monthly: a.brokerage, annual: a.brokerage * 12, note: "Taxable" },
+    { label: "HYSA", monthly: a.hysa, annual: a.hysa * 12, note: "Emergency fund" },
   ].filter((r) => r.monthly > 0);
 
   const totalMonthly = rows.reduce((s, r) => s + r.monthly, 0);
@@ -43,7 +42,6 @@ export default function ContributionPlan({ allocation: a }: Props) {
               borderBottom: i < rows.length - 1 ? "0.5px solid var(--separator)" : "none",
             }}
           >
-            <div style={{ width: 3, height: 32, borderRadius: 2, background: row.color, flexShrink: 0 }} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <p className="t-subhead" style={{ color: "var(--label)" }}>{row.label}</p>
               {row.note && <p className="t-caption2" style={{ color: "var(--label-3)" }}>{row.note}</p>}

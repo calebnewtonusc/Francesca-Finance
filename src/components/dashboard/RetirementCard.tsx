@@ -8,12 +8,12 @@ interface Props {
 
 export default function RetirementCard({ summary: s, retirementAge }: Props) {
   const rows = [
-    { label: "401(k)", value: s.by401k, note: `−${fmt$(s.taxDue401k)} est. tax`, color: "var(--blue)" },
-    { label: "Mega Backdoor Roth", value: s.byMegaBackdoor, note: "Tax-free", color: "var(--purple)" },
-    { label: "Roth IRA", value: s.byRothIRA, note: "Tax-free", color: "var(--green)" },
-    { label: "Brokerage", value: s.byBrokerage, note: `−${fmt$(s.taxDueBrokerage)} est. LTCG`, color: "var(--orange)" },
-    { label: "HYSA", value: s.byHYSA, note: "Liquid", color: "var(--label-2)" },
-    { label: "RSU (hold)", value: s.byRSU, note: "Mark-to-market", color: "var(--yellow, #ffd60a)" },
+    { label: "401(k)", value: s.by401k, note: `−${fmt$(s.taxDue401k)} est. tax` },
+    { label: "Mega Backdoor Roth", value: s.byMegaBackdoor, note: "Tax-free" },
+    { label: "Roth IRA", value: s.byRothIRA, note: "Tax-free" },
+    { label: "Brokerage", value: s.byBrokerage, note: `−${fmt$(s.taxDueBrokerage)} est. LTCG` },
+    { label: "HYSA", value: s.byHYSA, note: "Liquid" },
+    { label: "RSU (hold)", value: s.byRSU, note: "Mark-to-market" },
   ].filter((r) => r.value > 0);
 
   return (
@@ -53,12 +53,11 @@ export default function RetirementCard({ summary: s, retirementAge }: Props) {
           <div
             key={r.label}
             style={{
-              display: "flex", alignItems: "center", gap: 10,
+              display: "flex", alignItems: "center",
               padding: "9px 0",
               borderBottom: i < rows.length - 1 ? "0.5px solid var(--separator)" : "none",
             }}
           >
-            <div style={{ width: 3, height: 28, borderRadius: 2, background: r.color, flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
               <p className="t-footnote" style={{ color: "var(--label-2)" }}>{r.label}</p>
               <p className="t-caption2" style={{ color: "var(--label-3)" }}>{r.note}</p>

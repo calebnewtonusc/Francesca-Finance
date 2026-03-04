@@ -106,7 +106,6 @@ export default function AgentPanel({ profile }: Props) {
                   background: m.role === "user" ? "var(--blue)" : "var(--surface-2)",
                   color: m.role === "user" ? "#fff" : "var(--label)",
                   maxWidth: "88%",
-                  lineHeight: 1.5,
                   lineHeight: 1.6,
                 }}
               >
