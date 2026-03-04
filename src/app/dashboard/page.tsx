@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Nav from "@/components/nav";
 import NetWorthChart from "@/components/dashboard/NetWorthChart";
-import AccountCard from "@/components/dashboard/AccountCard";
 import ContributionPlan from "@/components/dashboard/ContributionPlan";
 import RetirementCard from "@/components/dashboard/RetirementCard";
 import AgentPanel from "@/components/dashboard/AgentPanel";
@@ -12,30 +11,21 @@ import { DEFAULT_PROFILE } from "@/lib/types";
 import { FinancialProfile, ProjectionYear, RetirementSummary, MonteCarloResult, MonthlyAllocation, AppAlert, Scenario, ProjectionMode } from "@/lib/types";
 import { fmtCompact, fmt$ } from "@/lib/format";
 
-// Icons
-const I = {
-  trad: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16"/></svg>,
-  roth: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>,
-  broker: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>,
-  hysa: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>,
-  mega: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>,
-};
-
 function ScenarioToggle({ scenario, mode, showReal, onScenario, onMode, onReal }:
   { scenario: Scenario; mode: ProjectionMode; showReal: boolean; onScenario: (s: Scenario) => void; onMode: (m: ProjectionMode) => void; onReal: (r: boolean) => void }
 ) {
   function Seg({ options, active, onChange }: { options: { value: string; label: string }[]; active: string; onChange: (v: string) => void }) {
     return (
-      <div style={{ display: "flex", background: "var(--surface-2)", borderRadius: 8, padding: 2, gap: 2 }}>
+      <div style={{ display: "flex", background: "var(--surface-2)", borderRadius: 7, padding: 2, gap: 2 }}>
         {options.map((o) => (
           <button
             key={o.value}
             onClick={() => onChange(o.value)}
             style={{
-              padding: "4px 10px", borderRadius: 6, border: "none",
+              padding: "3px 9px", borderRadius: 5, border: "none",
               background: active === o.value ? "var(--surface-3)" : "transparent",
-              color: active === o.value ? "var(--label)" : "var(--label-3)",
-              fontSize: 12, fontWeight: active === o.value ? 600 : 400,
+              color: active === o.value ? "var(--label-2)" : "var(--label-3)",
+              fontSize: 11, fontWeight: active === o.value ? 500 : 400,
               fontFamily: "var(--font)", cursor: "pointer",
               transition: "background 0.15s, color 0.15s",
             }}
@@ -48,7 +38,7 @@ function ScenarioToggle({ scenario, mode, showReal, onScenario, onMode, onReal }
   }
 
   return (
-    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+    <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
       <Seg options={[{value:"deterministic",label:"Deterministic"},{value:"monte_carlo",label:"Monte Carlo"}]} active={mode} onChange={(v) => onMode(v as ProjectionMode)} />
       {mode === "monte_carlo" && <Seg options={[{value:"conservative",label:"Conservative"},{value:"baseline",label:"Baseline"},{value:"aggressive",label:"Aggressive"}]} active={scenario} onChange={(v) => onScenario(v as Scenario)} />}
       <Seg options={[{value:"real",label:"Real"},{value:"nominal",label:"Nominal"}]} active={showReal ? "real" : "nominal"} onChange={(v) => onReal(v === "real")} />
@@ -119,75 +109,94 @@ export default function DashboardPage() {
   const now = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
   const totalNow = profile.balance401k + profile.balanceMegaBackdoor + profile.balanceRothIRA + profile.balanceBrokerage + profile.balanceHYSA + profile.rsuValue;
 
+  const accounts = [
+    { label: "401(k)", value: profile.balance401k },
+    { label: "Mega Backdoor", value: profile.balanceMegaBackdoor },
+    { label: "Roth IRA", value: profile.balanceRothIRA },
+    { label: "Brokerage", value: profile.balanceBrokerage },
+    { label: "HYSA", value: profile.balanceHYSA },
+  ];
+
   return (
     <>
       <Nav />
-      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "68px 24px 40px" }}>
+      <main style={{ maxWidth: 1060, margin: "0 auto", padding: "68px 24px 40px" }}>
 
         {/* Header */}
-        <div className="fade-up" style={{ marginBottom: 28 }}>
+        <div className="fade-up" style={{ marginBottom: 24 }}>
           <p className="t-footnote" style={{ color: "var(--label-3)", marginBottom: 4 }}>{now}</p>
           <h1 className="t-large-title" style={{ color: "var(--label)" }}>{getGreeting()}, Francesca.</h1>
         </div>
 
         {/* Alerts */}
         {alerts.length > 0 && (
-          <div className="fade-up delay-1" style={{ marginBottom: 20 }}>
+          <div className="fade-up delay-1" style={{ marginBottom: 16 }}>
             <AlertBanner alerts={alerts} />
           </div>
         )}
 
-        {/* Net worth hero */}
-        <div className="glass fade-up delay-1" style={{ padding: "24px 24px 20px", marginBottom: 16 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4, flexWrap: "wrap", gap: 12 }}>
-            <div>
-              <p className="t-caption1" style={{ color: "var(--label-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Total Net Worth</p>
-              <p style={{ fontSize: 44, fontWeight: 700, color: "var(--label)", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
-                {fmtCompact(totalNow)}
-              </p>
-              <p className="t-footnote" style={{ color: "var(--label-3)", marginTop: 6 }}>
-                Current · projection at 59.5:{" "}
-                <span style={{ color: "var(--green)" }}>
-                  {retirement ? fmtCompact(retirement.afterTaxTotal) : "—"}
-                </span>
-                {" "}after tax
+        {/* ─── Net Worth Hero ─── */}
+        <div className="glass fade-up delay-1" style={{ padding: "24px 24px 0", marginBottom: 12 }}>
+
+          {/* Primary number */}
+          <div style={{ marginBottom: 16 }}>
+            <p className="t-caption1" style={{ color: "var(--label-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Total Net Worth</p>
+            <p style={{ fontSize: 52, fontWeight: 700, color: "var(--label)", fontVariantNumeric: "tabular-nums", lineHeight: 1, letterSpacing: "-1px" }}>
+              {fmtCompact(totalNow)}
+            </p>
+            <p className="t-footnote" style={{ color: "var(--label-3)", marginTop: 8 }}>
+              Projected at {profile.retirementAge}:{" "}
+              <span style={{ color: loading ? "var(--label-3)" : "var(--green)" }}>
+                {retirement ? fmtCompact(retirement.afterTaxTotal) : "—"}
+              </span>
+              {" "}after tax · real dollars
+            </p>
+          </div>
+
+          {/* Chart */}
+          {loading ? (
+            <div className="skeleton" style={{ height: 200, borderRadius: 8 }} />
+          ) : fetchError ? (
+            <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <p className="t-footnote" style={{ color: "var(--label-3)" }}>
+                Unable to load —{" "}
+                <button onClick={fetchForecast} style={{ background: "none", border: "none", color: "var(--blue)", cursor: "pointer", fontFamily: "var(--font)", fontSize: 13 }}>Retry</button>
               </p>
             </div>
+          ) : (
+            <NetWorthChart projection={projection} monteCarlo={monteCarlo} mode={mode} showReal={showReal} startAge={profile.age} />
+          )}
+
+          {/* Scenario controls — below chart, subordinate */}
+          <div style={{ display: "flex", justifyContent: "flex-end", padding: "10px 0 14px" }}>
             <ScenarioToggle scenario={scenario} mode={mode} showReal={showReal} onScenario={setScenario} onMode={setMode} onReal={setShowReal} />
           </div>
 
-          {loading ? (
-            <div className="skeleton" style={{ height: 220, marginTop: 16, borderRadius: 10 }} />
-          ) : fetchError ? (
-            <div style={{ height: 220, marginTop: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <p className="t-footnote" style={{ color: "var(--label-3)" }}>Unable to load projection — <button onClick={fetchForecast} style={{ background: "none", border: "none", color: "var(--blue)", cursor: "pointer", fontFamily: "var(--font)", fontSize: 13 }}>Retry</button></p>
-            </div>
-          ) : (
-            <div style={{ marginTop: 16 }}>
-              <NetWorthChart projection={projection} monteCarlo={monteCarlo} mode={mode} showReal={showReal} startAge={profile.age} />
-            </div>
-          )}
-        </div>
-
-        {/* Account cards */}
-        <div
-          className="fade-up delay-2"
-          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10, marginBottom: 16 }}
-        >
-          <AccountCard label="401(k) Traditional" balance={profile.balance401k} type="tax-deferred" icon={I.trad} />
-          <AccountCard label="Mega Backdoor Roth" balance={profile.balanceMegaBackdoor} type="tax-free" icon={I.mega} />
-          <AccountCard label="Roth IRA" balance={profile.balanceRothIRA} type="tax-free" icon={I.roth} />
-          <AccountCard label="Brokerage" balance={profile.balanceBrokerage} type="taxable" icon={I.broker} />
-          <AccountCard label="HYSA" balance={profile.balanceHYSA} type="cash" icon={I.hysa} />
+          {/* Account balance chips — inside hero, separated */}
+          <div style={{ borderTop: "0.5px solid var(--separator)", display: "grid", gridTemplateColumns: "repeat(5, 1fr)" }}>
+            {accounts.map((a, i) => (
+              <div
+                key={a.label}
+                style={{
+                  padding: "14px 0 16px",
+                  paddingLeft: i > 0 ? 14 : 0,
+                  borderLeft: i > 0 ? "0.5px solid var(--separator)" : "none",
+                }}
+              >
+                <p className="t-caption2" style={{ color: "var(--label-3)", marginBottom: 4 }}>{a.label}</p>
+                <p className="t-subhead" style={{ color: "var(--label)", fontVariantNumeric: "tabular-nums", fontWeight: 500 }}>{fmt$(a.value)}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Monte Carlo percentile table */}
         {mode === "monte_carlo" && monteCarlo && (
-          <div className="glass fade-up delay-2" style={{ padding: "18px 20px", marginBottom: 16 }}>
-            <p className="t-headline" style={{ color: "var(--label)", marginBottom: 14 }}>At 59.5 — Probability Range (real $)</p>
+          <div className="glass fade-up delay-2" style={{ padding: "18px 20px", marginBottom: 12 }}>
+            <p className="t-footnote" style={{ color: "var(--label-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>At {profile.retirementAge} — Probability Range</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 0 }}>
               {(["p10","p25","p50","p75","p90"] as const).map((k, i) => (
-                <div key={k} style={{ padding: "10px 0", borderRight: i < 4 ? "0.5px solid var(--separator)" : "none", textAlign: "center" }}>
+                <div key={k} style={{ padding: "0", paddingLeft: i > 0 ? 14 : 0, borderLeft: i > 0 ? "0.5px solid var(--separator)" : "none" }}>
                   <p className="t-caption2" style={{ color: "var(--label-3)", marginBottom: 4 }}>{k.toUpperCase()}</p>
                   <p className="t-subhead" style={{ color: k === "p50" ? "var(--green)" : "var(--label)", fontVariantNumeric: "tabular-nums" }}>{fmtCompact(monteCarlo[k])}</p>
                 </div>
@@ -196,27 +205,22 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Bottom grid */}
-        <div className="fade-up delay-3" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 12, marginBottom: 16 }}>
+        {/* ─── Cards Row ─── */}
+        <div className="fade-up delay-2" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 12, marginBottom: 12 }}>
           {allocation && <ContributionPlan allocation={allocation} />}
           {retirement && <RetirementCard summary={retirement} retirementAge={profile.retirementAge} />}
         </div>
 
-        {/* Agent */}
-        <div className="fade-up delay-4">
-          <AgentPanel profile={profile} />
-        </div>
-
-        {/* HYSA progress */}
+        {/* HYSA progress — only when below target */}
         {profile.balanceHYSA < profile.emergencyFundTarget && (
-          <div className="glass fade-up delay-5" style={{ marginTop: 12, padding: "16px 20px" }}>
+          <div className="glass fade-up delay-3" style={{ marginBottom: 12, padding: "16px 20px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
               <p className="t-footnote" style={{ color: "var(--label-2)" }}>Emergency Fund</p>
               <p className="t-footnote" style={{ color: "var(--label-3)" }}>
                 {fmt$(profile.balanceHYSA)} / {fmt$(profile.emergencyFundTarget)}
               </p>
             </div>
-            <div style={{ height: 4, background: "var(--surface-2)", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{ height: 3, background: "var(--surface-2)", borderRadius: 2, overflow: "hidden" }}>
               <div style={{
                 height: "100%", borderRadius: 2,
                 background: "var(--green)",
@@ -226,6 +230,12 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
+
+        {/* Agent */}
+        <div className="fade-up delay-3">
+          <AgentPanel profile={profile} />
+        </div>
+
       </main>
     </>
   );

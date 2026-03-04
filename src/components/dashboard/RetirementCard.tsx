@@ -18,36 +18,24 @@ export default function RetirementCard({ summary: s, retirementAge }: Props) {
 
   return (
     <div className="glass" style={{ padding: "20px 20px" }}>
-      {/* Hero */}
-      <div style={{ marginBottom: 20, paddingBottom: 18, borderBottom: "0.5px solid var(--separator)" }}>
-        <p className="t-caption1" style={{ color: "var(--label-3)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-          At age {retirementAge}
-        </p>
-        <p style={{ fontSize: 38, fontWeight: 700, color: "var(--green)", fontVariantNumeric: "tabular-nums", lineHeight: 1.1 }}>
-          {fmtCompact(s.afterTaxTotal)}
-        </p>
-        <p className="t-footnote" style={{ color: "var(--label-3)", marginTop: 4 }}>
-          After estimated taxes · real 2026 dollars
-        </p>
 
-        {/* 4% rule */}
-        <div style={{ marginTop: 14, display: "flex", gap: 24 }}>
-          <div>
-            <p className="t-caption2" style={{ color: "var(--label-3)" }}>Safe withdrawal (4%)</p>
-            <p className="t-headline" style={{ color: "var(--label)", fontVariantNumeric: "tabular-nums" }}>
-              {fmt$(s.safeWithdrawalMonthly)}<span className="t-footnote" style={{ color: "var(--label-3)" }}>/mo</span>
-            </p>
-          </div>
-          <div>
-            <p className="t-caption2" style={{ color: "var(--label-3)" }}>Annual</p>
-            <p className="t-headline" style={{ color: "var(--label)", fontVariantNumeric: "tabular-nums" }}>
-              {fmtCompact(s.safeWithdrawalAnnual)}
-            </p>
-          </div>
-        </div>
+      {/* Section label */}
+      <p className="t-caption1" style={{ color: "var(--label-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 16 }}>
+        At age {retirementAge}
+      </p>
+
+      {/* Safe withdrawal — the actionable number */}
+      <div style={{ marginBottom: 18, paddingBottom: 18, borderBottom: "0.5px solid var(--separator)" }}>
+        <p className="t-footnote" style={{ color: "var(--label-3)", marginBottom: 4 }}>Safe withdrawal · 4% rule</p>
+        <p style={{ fontSize: 28, fontWeight: 700, color: "var(--label)", fontVariantNumeric: "tabular-nums", lineHeight: 1.1 }}>
+          {fmt$(s.safeWithdrawalMonthly)}<span className="t-footnote" style={{ color: "var(--label-3)", fontWeight: 400 }}>/mo</span>
+        </p>
+        <p className="t-caption2" style={{ color: "var(--label-3)", marginTop: 4 }}>
+          {fmtCompact(s.safeWithdrawalAnnual)}/yr · after estimated taxes
+        </p>
       </div>
 
-      {/* By account */}
+      {/* Account breakdown */}
       <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
         {rows.map((r, i) => (
           <div
