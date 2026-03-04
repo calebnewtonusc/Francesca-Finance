@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Apple Design System — Dark Mode ────────────────────────────────────── */
+:root {
+  --bg:           #000000;
+  --surface-1:    #1c1c1e;
+  --surface-2:    #2c2c2e;
+  --surface-3:    #3a3a3c;
+  --label:        #ffffff;
+  --label-2:      rgba(235,235,245,0.6);
+  --label-3:      rgba(235,235,245,0.3);
+  --label-4:      rgba(235,235,245,0.18);
+  --separator:    rgba(84,84,88,0.65);
+  --sep-opaque:   #38383a;
+  --green:        #30d158;
+  --green-dim:    rgba(48,209,88,0.15);
+  --blue:         #0a84ff;
+  --blue-dim:     rgba(10,132,255,0.15);
+  --red:          #ff453a;
+  --red-dim:      rgba(255,69,58,0.15);
+  --orange:       #ff9f0a;
+  --yellow:       #ffd60a;
+  --purple:       #bf5af2;
+  --font:         -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--label);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body { min-height: 100dvh; background: var(--bg); }
+
+/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+
+/* ─── Selection ──────────────────────────────────────────────────────────── */
+::selection { background: rgba(48,209,88,0.25); }
+
+/* ─── Focus visible ──────────────────────────────────────────────────────── */
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 6px; }
+
+/* ─── Typography scale ───────────────────────────────────────────────────── */
+.t-large-title { font-size: 34px; font-weight: 700; letter-spacing: 0.37px; line-height: 1.2; }
+.t-title1      { font-size: 28px; font-weight: 700; letter-spacing: 0.36px; }
+.t-title2      { font-size: 22px; font-weight: 700; letter-spacing: 0.35px; }
+.t-title3      { font-size: 20px; font-weight: 600; letter-spacing: 0.38px; }
+.t-headline    { font-size: 17px; font-weight: 600; letter-spacing: -0.41px; }
+.t-body        { font-size: 17px; font-weight: 400; letter-spacing: -0.41px; }
+.t-callout     { font-size: 16px; font-weight: 400; letter-spacing: -0.31px; }
+.t-subhead     { font-size: 15px; font-weight: 400; letter-spacing: -0.24px; }
+.t-footnote    { font-size: 13px; font-weight: 400; letter-spacing: -0.08px; }
+.t-caption1    { font-size: 12px; font-weight: 400; letter-spacing: 0; }
+.t-caption2    { font-size: 11px; font-weight: 400; letter-spacing: 0.06px; }
+
+/* ─── Glass card ─────────────────────────────────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(40px) saturate(1.8);
+  -webkit-backdrop-filter: blur(40px) saturate(1.8);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+}
+
+.glass-nav {
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(28px) saturate(1.9);
+  -webkit-backdrop-filter: blur(28px) saturate(1.9);
+  border-bottom: 0.5px solid rgba(255,255,255,0.1);
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes typingBounce {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50%       { transform: translateY(-3px); opacity: 1; }
+}
+
+.fade-up { animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.fade-in { animation: fadeIn 0.4s ease both; }
+
+.delay-1 { animation-delay: 0.08s; }
+.delay-2 { animation-delay: 0.16s; }
+.delay-3 { animation-delay: 0.24s; }
+.delay-4 { animation-delay: 0.32s; }
+.delay-5 { animation-delay: 0.40s; }
+
+/* ─── Skeleton ───────────────────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-1) 25%, var(--surface-2) 50%, var(--surface-1) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 8px;
+}
+
+/* ─── Number formatting ───────────────────────────────────────────────────── */
+.num-green { color: var(--green); }
+.num-red   { color: var(--red); }
+.num-dim   { color: var(--label-2); }
+
+/* ─── Accessibility ─────────────────────────────────────────────────────── */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
